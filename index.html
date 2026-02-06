@@ -49,74 +49,243 @@
   </div>
 
 <script>
-const data = {
+/**
+ * ==========================
+ * ✅ 追記専用ゾーン（ここだけ触る）
+ * ==========================
+ * 追加ルール：
+ * 1) 新しいカテゴリ → DATA にカテゴリ名を追加
+ * 2) 新しい用途 → そのカテゴリ内に用途名を追加
+ * 3) テンプレ追加 → intro / reason / ending の配列に文章を足す
+ *
+ * 文の作り方（基本形）：
+ *  intro + reason + ending
+ *
+ * 注意：
+ * - 「ウソ断定」や「違法助長」っぽい文は入れない
+ * - 1文は長くしすぎない（50〜120文字目安）
+ */
+const DATA = {
   "仕事・ビジネス": {
-    "断る": [
-      "ご連絡ありがとうございます。検討いたしましたが、現状の体制ではお引き受けが難しい状況です。また別の機会がございましたらお願いします。",
-      "今回はスケジュールの都合上、対応が難しそうです。恐れ入りますが、見送らせてください。"
-    ],
-    "先延ばし": [
-      "現在確認中の点があり、少しお時間をいただければと思います。整理でき次第ご連絡します。",
-      "状況を確認してから改めて回答いたします。少々お待ちください。"
-    ],
-    "催促をかわす": [
-      "ご連絡ありがとうございます。現在対応中ですので、進捗があり次第ご連絡いたします。",
-      "優先度を調整して進めております。今しばらくお待ちいただけますと幸いです。"
-    ]
+    "断る": {
+      intro: [
+        "ご連絡ありがとうございます。",
+        "お声がけありがとうございます。"
+      ],
+      reason: [
+        "現状のスケジュールの都合で、対応が難しい状況です。",
+        "体制の都合上、今回はお引き受けが難しそうです。"
+      ],
+      ending: [
+        "恐れ入りますが、見送らせてください。",
+        "また別の機会がございましたら、ぜひお願いします。"
+      ]
+    },
+    "先延ばし": {
+      intro: [
+        "ご連絡ありがとうございます。",
+        "確認いたします。"
+      ],
+      reason: [
+        "社内で確認している点があり、少しお時間をいただければと思います。",
+        "状況を整理してから判断したく、少々お待ちください。"
+      ],
+      ending: [
+        "進捗があり次第ご連絡します。",
+        "まとまり次第、改めてご連絡いたします。"
+      ]
+    },
+    "催促をかわす": {
+      intro: [
+        "ご連絡ありがとうございます。",
+        "お待たせしており申し訳ありません。"
+      ],
+      reason: [
+        "現在対応中のため、今しばらくお時間をいただけますでしょうか。",
+        "優先度を調整して進めております。"
+      ],
+      ending: [
+        "進捗があり次第ご連絡します。",
+        "恐れ入りますが、もう少々お待ちください。"
+      ]
+    }
   },
+
   "プライベート": {
-    "飲み会を断る": [
-      "最近体調管理を優先していて、今回は見送らせてください。また誘ってください！",
-      "今月ちょっとバタバタしてて…今回はパスで🙏 落ち着いたら行こう！"
-    ],
-    "誘いを保留": [
-      "予定を確認してから、改めて連絡するね。",
-      "今ちょっと調整中だから、わかったらすぐ返す！"
-    ]
+    "飲み会を断る": {
+      intro: [
+        "誘ってくれてありがとう！",
+        "お誘いありがとう〜！"
+      ],
+      reason: [
+        "最近ちょっとバタバタしてて、今回は難しそう。",
+        "体調管理を優先したくて、今回は見送らせて…！"
+      ],
+      ending: [
+        "また落ち着いたら行こう！",
+        "また次回ぜひ誘って！"
+      ]
+    },
+    "誘いを保留": {
+      intro: [
+        "ありがとう！",
+        "了解！"
+      ],
+      reason: [
+        "予定を確認してから返したいから、少し待ってね。",
+        "今ちょっと調整中で、すぐ確定できなくて…！"
+      ],
+      ending: [
+        "分かったらすぐ連絡する！",
+        "確認できたら改めて返すね。"
+      ]
+    }
   },
+
   "お金・契約": {
-    "支払いを待ってもらう": [
-      "現在手続き中のため、反映まで少しお時間をいただけますでしょうか。完了次第ご連絡します。",
-      "確認事項があり、処理に時間がかかっています。恐れ入りますが、もう少々お待ちください。"
-    ],
-    "値引きを断る": [
-      "申し訳ありませんが、現在の条件が精一杯となります。ご了承ください。",
-      "ご希望は承知しましたが、価格面は現条件でお願いできればと思います。"
-    ]
+    "支払いを待ってもらう": {
+      intro: [
+        "ご連絡ありがとうございます。",
+        "お待たせしており申し訳ありません。"
+      ],
+      reason: [
+        "現在手続き中のため、反映まで少しお時間をいただけますでしょうか。",
+        "確認事項があり、処理に時間がかかっております。"
+      ],
+      ending: [
+        "完了次第ご連絡します。",
+        "恐れ入りますが、もう少々お待ちください。"
+      ]
+    },
+    "値引きを断る": {
+      intro: [
+        "ご相談ありがとうございます。",
+        "ご希望は承知しました。"
+      ],
+      reason: [
+        "申し訳ありませんが、価格面は現条件が精一杯となります。",
+        "現時点では条件の変更が難しい状況です。"
+      ],
+      ending: [
+        "ご了承いただけますと幸いです。",
+        "ご理解のほど、よろしくお願いいたします。"
+      ]
+    }
   },
+
   "学校・習い事": {
-    "欠席連絡": [
-      "体調不良のため、本日はお休みさせてください。よろしくお願いいたします。",
-      "都合により本日は欠席いたします。次回よろしくお願いします。"
-    ],
-    "提出遅れ": [
-      "準備が整っておらず、提出が遅れてしまい申し訳ありません。○日までに提出いたします。",
-      "確認に時間がかかっており遅れております。申し訳ありません、でき次第提出します。"
-    ]
+    "欠席連絡": {
+      intro: [
+        "お世話になっております。",
+        "ご連絡いたします。"
+      ],
+      reason: [
+        "体調不良のため、本日はお休みさせてください。",
+        "都合により本日は欠席いたします。"
+      ],
+      ending: [
+        "よろしくお願いいたします。",
+        "次回よろしくお願いいたします。"
+      ]
+    },
+    "提出遅れ": {
+      intro: [
+        "お世話になっております。",
+        "ご連絡いたします。"
+      ],
+      reason: [
+        "準備が整っておらず、提出が遅れてしまい申し訳ありません。",
+        "確認に時間がかかっており、遅れております。"
+      ],
+      ending: [
+        "でき次第提出いたします。",
+        "申し訳ありませんが、よろしくお願いいたします。"
+      ]
+    }
   },
+
   "万能": {
-    "時間を稼ぐ": [
-      "少し検討する時間をいただけると助かります。まとまり次第ご連絡します。",
-      "確認してから改めてお返事します。少々お待ちください。"
-    ],
-    "深掘り回避": [
-      "現状では詳細をお伝えできず、ご了承ください。",
-      "いまは確定していないため、決まり次第共有します。"
-    ]
+    "時間を稼ぐ": {
+      intro: [
+        "ありがとうございます。",
+        "承知しました。"
+      ],
+      reason: [
+        "少し検討する時間をいただけると助かります。",
+        "確認してから改めてお返事したいです。"
+      ],
+      ending: [
+        "まとまり次第ご連絡します。",
+        "少々お待ちください。"
+      ]
+    },
+    "深掘り回避": {
+      intro: [
+        "ありがとうございます。",
+        "すみません。"
+      ],
+      reason: [
+        "現状では詳細をお伝えできず、ご了承ください。",
+        "いまは確定していないため、決まり次第共有します。"
+      ],
+      ending: [
+        "ご理解いただけますと幸いです。",
+        "よろしくお願いします。"
+      ]
+    }
   }
 };
+/**
+ * ==========================
+ * ✅ 追記専用ゾーンここまで
+ * ==========================
+ */
 
 const elCategory = document.getElementById("category");
-const elPurpose = document.getElementById("purpose");
-const elOutput = document.getElementById("output");
-const btnReload = document.getElementById("reload");
-const btnCopy = document.getElementById("copy");
+const elPurpose  = document.getElementById("purpose");
+const elOutput   = document.getElementById("output");
+const btnReload  = document.getElementById("reload");
+const btnCopy    = document.getElementById("copy");
 
 let lastText = "";
 
+/** ランダムで配列から1つ */
+function pick(arr) {
+  return arr[Math.floor(Math.random() * arr.length)];
+}
+
+/** intro+reason+ending を組み立て、同じ文章が連続しないようにする */
+function buildText() {
+  const cat = elCategory.value;
+  const pur = elPurpose.value;
+  const node = DATA?.[cat]?.[pur];
+
+  if (!node) return "テンプレがまだありません。";
+
+  const { intro = [], reason = [], ending = [] } = node;
+
+  // パーツが足りない場合の安全策
+  const i = intro.length  ? pick(intro)  : "";
+  const r = reason.length ? pick(reason) : "";
+  const e = ending.length ? pick(ending) : "";
+
+  let text = [i, r, e].filter(Boolean).join("\n");
+
+  // 同じ文が出たら最大5回まで作り直し
+  for (let k = 0; k < 5 && text === lastText; k++) {
+    const i2 = intro.length  ? pick(intro)  : i;
+    const r2 = reason.length ? pick(reason) : r;
+    const e2 = ending.length ? pick(ending) : e;
+    text = [i2, r2, e2].filter(Boolean).join("\n");
+  }
+
+  lastText = text;
+  return text;
+}
+
 function populateCategories() {
   elCategory.innerHTML = "";
-  Object.keys(data).forEach((cat) => {
+  Object.keys(DATA).forEach((cat) => {
     const opt = document.createElement("option");
     opt.value = cat;
     opt.textContent = cat;
@@ -127,32 +296,16 @@ function populateCategories() {
 function populatePurposes() {
   const cat = elCategory.value;
   elPurpose.innerHTML = "";
-  Object.keys(data[cat]).forEach((p) => {
+  Object.keys(DATA[cat]).forEach((pur) => {
     const opt = document.createElement("option");
-    opt.value = p;
-    opt.textContent = p;
+    opt.value = pur;
+    opt.textContent = pur;
     elPurpose.appendChild(opt);
   });
 }
 
-function pickText() {
-  const cat = elCategory.value;
-  const p = elPurpose.value;
-  const arr = data[cat][p];
-
-  if (!arr || arr.length === 0) return "テンプレがまだありません。";
-
-  // 同じ文が連続しないように最大5回まで再抽選
-  let text = arr[Math.floor(Math.random() * arr.length)];
-  for (let i = 0; i < 5 && text === lastText && arr.length > 1; i++) {
-    text = arr[Math.floor(Math.random() * arr.length)];
-  }
-  lastText = text;
-  return text;
-}
-
 function generate() {
-  elOutput.value = pickText();
+  elOutput.value = buildText();
 }
 
 elCategory.addEventListener("change", () => {
@@ -168,12 +321,13 @@ btnCopy.addEventListener("click", async () => {
     await navigator.clipboard.writeText(elOutput.value);
     const prev = btnCopy.textContent;
     btnCopy.textContent = "コピーしました";
-    setTimeout(() => btnCopy.textContent = prev, 900);
-  } catch (e) {
+    setTimeout(() => (btnCopy.textContent = prev), 900);
+  } catch {
     alert("コピーに失敗しました。手動で選択してコピーしてください。");
   }
 });
 
+// 初期化
 populateCategories();
 populatePurposes();
 generate();

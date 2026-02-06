@@ -1,0 +1,182 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>角が立たない一文メーカー</title>
+  <style>
+    body { font-family: system-ui, -apple-system, "Segoe UI", sans-serif; margin: 0; background:#f7f7f7; }
+    .wrap { max-width: 720px; margin: 0 auto; padding: 16px; }
+    .card { background:#fff; border-radius: 14px; padding: 16px; box-shadow: 0 6px 18px rgba(0,0,0,.06); }
+    h1 { font-size: 18px; margin: 0 0 6px; }
+    .sub { color:#666; font-size: 12px; margin-bottom: 14px; }
+    .row { display:flex; gap:10px; flex-wrap:wrap; }
+    select { flex:1; min-width: 160px; padding: 10px; border-radius: 10px; border:1px solid #ddd; background:#fff; }
+    textarea { width:100%; height: 140px; padding: 12px; border-radius: 12px; border:1px solid #ddd; resize:none; font-size: 14px; line-height: 1.6; }
+    .btns { display:flex; gap:10px; margin-top: 10px; flex-wrap:wrap; }
+    button { padding: 10px 12px; border:0; border-radius: 12px; background:#111; color:#fff; cursor:pointer; }
+    button.secondary { background:#e9e9e9; color:#111; }
+    .ad { margin-top: 14px; padding: 14px; border-radius: 12px; background:#fafafa; border:1px dashed #ddd; color:#777; font-size:12px; text-align:center; }
+    .foot { margin-top: 14px; color:#777; font-size: 11px; line-height:1.6; }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="card">
+      <h1>角が立たない一文メーカー</h1>
+      <div class="sub">カテゴリと用途を選ぶだけ。文章が自動で出ます（ログイン不要）</div>
+
+      <div class="row">
+        <select id="category"></select>
+        <select id="purpose"></select>
+      </div>
+
+      <div style="margin-top:12px;">
+        <textarea id="output" readonly></textarea>
+        <div class="btns">
+          <button id="copy">コピー</button>
+          <button id="reload" class="secondary">別案を出す</button>
+        </div>
+      </div>
+
+      <div class="ad">広告枠（ここにAdSense等）</div>
+
+      <div class="foot">
+        ※本サービスは文章例を提供するもので、利用結果について責任を負いません。<br/>
+        露骨な虚偽や違法行為を助長する用途には使用しないでください。
+      </div>
+    </div>
+  </div>
+
+<script>
+const data = {
+  "仕事・ビジネス": {
+    "断る": [
+      "ご連絡ありがとうございます。検討いたしましたが、現状の体制ではお引き受けが難しい状況です。また別の機会がございましたらお願いします。",
+      "今回はスケジュールの都合上、対応が難しそうです。恐れ入りますが、見送らせてください。"
+    ],
+    "先延ばし": [
+      "現在確認中の点があり、少しお時間をいただければと思います。整理でき次第ご連絡します。",
+      "状況を確認してから改めて回答いたします。少々お待ちください。"
+    ],
+    "催促をかわす": [
+      "ご連絡ありがとうございます。現在対応中ですので、進捗があり次第ご連絡いたします。",
+      "優先度を調整して進めております。今しばらくお待ちいただけますと幸いです。"
+    ]
+  },
+  "プライベート": {
+    "飲み会を断る": [
+      "最近体調管理を優先していて、今回は見送らせてください。また誘ってください！",
+      "今月ちょっとバタバタしてて…今回はパスで🙏 落ち着いたら行こう！"
+    ],
+    "誘いを保留": [
+      "予定を確認してから、改めて連絡するね。",
+      "今ちょっと調整中だから、わかったらすぐ返す！"
+    ]
+  },
+  "お金・契約": {
+    "支払いを待ってもらう": [
+      "現在手続き中のため、反映まで少しお時間をいただけますでしょうか。完了次第ご連絡します。",
+      "確認事項があり、処理に時間がかかっています。恐れ入りますが、もう少々お待ちください。"
+    ],
+    "値引きを断る": [
+      "申し訳ありませんが、現在の条件が精一杯となります。ご了承ください。",
+      "ご希望は承知しましたが、価格面は現条件でお願いできればと思います。"
+    ]
+  },
+  "学校・習い事": {
+    "欠席連絡": [
+      "体調不良のため、本日はお休みさせてください。よろしくお願いいたします。",
+      "都合により本日は欠席いたします。次回よろしくお願いします。"
+    ],
+    "提出遅れ": [
+      "準備が整っておらず、提出が遅れてしまい申し訳ありません。○日までに提出いたします。",
+      "確認に時間がかかっており遅れております。申し訳ありません、でき次第提出します。"
+    ]
+  },
+  "万能": {
+    "時間を稼ぐ": [
+      "少し検討する時間をいただけると助かります。まとまり次第ご連絡します。",
+      "確認してから改めてお返事します。少々お待ちください。"
+    ],
+    "深掘り回避": [
+      "現状では詳細をお伝えできず、ご了承ください。",
+      "いまは確定していないため、決まり次第共有します。"
+    ]
+  }
+};
+
+const elCategory = document.getElementById("category");
+const elPurpose = document.getElementById("purpose");
+const elOutput = document.getElementById("output");
+const btnReload = document.getElementById("reload");
+const btnCopy = document.getElementById("copy");
+
+let lastText = "";
+
+function populateCategories() {
+  elCategory.innerHTML = "";
+  Object.keys(data).forEach((cat) => {
+    const opt = document.createElement("option");
+    opt.value = cat;
+    opt.textContent = cat;
+    elCategory.appendChild(opt);
+  });
+}
+
+function populatePurposes() {
+  const cat = elCategory.value;
+  elPurpose.innerHTML = "";
+  Object.keys(data[cat]).forEach((p) => {
+    const opt = document.createElement("option");
+    opt.value = p;
+    opt.textContent = p;
+    elPurpose.appendChild(opt);
+  });
+}
+
+function pickText() {
+  const cat = elCategory.value;
+  const p = elPurpose.value;
+  const arr = data[cat][p];
+
+  if (!arr || arr.length === 0) return "テンプレがまだありません。";
+
+  // 同じ文が連続しないように最大5回まで再抽選
+  let text = arr[Math.floor(Math.random() * arr.length)];
+  for (let i = 0; i < 5 && text === lastText && arr.length > 1; i++) {
+    text = arr[Math.floor(Math.random() * arr.length)];
+  }
+  lastText = text;
+  return text;
+}
+
+function generate() {
+  elOutput.value = pickText();
+}
+
+elCategory.addEventListener("change", () => {
+  populatePurposes();
+  generate();
+});
+
+elPurpose.addEventListener("change", generate);
+btnReload.addEventListener("click", generate);
+
+btnCopy.addEventListener("click", async () => {
+  try {
+    await navigator.clipboard.writeText(elOutput.value);
+    const prev = btnCopy.textContent;
+    btnCopy.textContent = "コピーしました";
+    setTimeout(() => btnCopy.textContent = prev, 900);
+  } catch (e) {
+    alert("コピーに失敗しました。手動で選択してコピーしてください。");
+  }
+});
+
+populateCategories();
+populatePurposes();
+generate();
+</script>
+</body>
+</html>

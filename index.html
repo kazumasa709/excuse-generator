@@ -53,185 +53,89 @@
  * ==========================
  * ✅ 追記専用ゾーン（ここだけ触る）
  * ==========================
+ * 構造：カテゴリ → 用途 → トーン → intro/reason/ending
  * 追加ルール：
- * 1) 新しいカテゴリ → DATA にカテゴリ名を追加
- * 2) 新しい用途 → そのカテゴリ内に用途名を追加
- * 3) テンプレ追加 → intro / reason / ending の配列に文章を足す
- *
- * 文の作り方（基本形）：
- *  intro + reason + ending
- *
- * 注意：
- * - 「ウソ断定」や「違法助長」っぽい文は入れない
- * - 1文は長くしすぎない（50〜120文字目安）
+ * 1) 新カテゴリ：DATAに追加
+ * 2) 新用途：カテゴリの中に追加
+ * 3) 新トーン：toneキー（"丁寧" "普通" "ふざけた"）を追加
+ * 4) 文追加：intro/reason/ending に1行追加
  */
 const DATA = {
   "仕事・ビジネス": {
     "断る": {
-      intro: [
-        "ご連絡ありがとうございます。",
-        "お声がけありがとうございます。"
-      ],
-      reason: [
-        "現状のスケジュールの都合で、対応が難しい状況です。",
-        "体制の都合上、今回はお引き受けが難しそうです。"
-      ],
-      ending: [
-        "恐れ入りますが、見送らせてください。",
-        "また別の機会がございましたら、ぜひお願いします。"
-      ]
+      "丁寧": {
+        intro: ["ご連絡ありがとうございます。", "お声がけありがとうございます。"],
+        reason: ["現状の体制では対応が難しい状況です。", "スケジュールの都合で調整が難しそうです。"],
+        ending: ["恐れ入りますが、見送らせてください。", "また別の機会がございましたら、よろしくお願いいたします。"]
+      },
+      "普通": {
+        intro: ["連絡ありがとうございます。", "声かけありがとう！"],
+        reason: ["今ちょっと手が回らなくて…", "予定が詰まってて難しそう。"],
+        ending: ["今回は見送らせて！", "またタイミング合うときにお願いします！"]
+      },
+      "ふざけた": {
+        intro: ["お誘い感謝っ…！", "召喚ありがとうございます！"],
+        reason: ["今の私、タスクに包囲されております。", "スケジュールが満員御礼でござる。"],
+        ending: ["今回は撤退します🫡", "また次のクエストで！"]
+      }
     },
-    "先延ばし": {
-      intro: [
-        "ご連絡ありがとうございます。",
-        "確認いたします。"
-      ],
-      reason: [
-        "社内で確認している点があり、少しお時間をいただければと思います。",
-        "状況を整理してから判断したく、少々お待ちください。"
-      ],
-      ending: [
-        "進捗があり次第ご連絡します。",
-        "まとまり次第、改めてご連絡いたします。"
-      ]
-    },
+
     "催促をかわす": {
-      intro: [
-        "ご連絡ありがとうございます。",
-        "お待たせしており申し訳ありません。"
-      ],
-      reason: [
-        "現在対応中のため、今しばらくお時間をいただけますでしょうか。",
-        "優先度を調整して進めております。"
-      ],
-      ending: [
-        "進捗があり次第ご連絡します。",
-        "恐れ入りますが、もう少々お待ちください。"
-      ]
+      "丁寧": {
+        intro: ["ご連絡ありがとうございます。", "お待たせしており申し訳ありません。"],
+        reason: ["現在対応中で、確認に少しお時間をいただいております。", "社内確認が必要な点があり、進行中です。"],
+        ending: ["進捗があり次第ご連絡いたします。", "恐れ入りますが、今しばらくお待ちください。"]
+      },
+      "普通": {
+        intro: ["連絡ありがとう！", "ごめん、確認中！"],
+        reason: ["いま対応してるところです。", "ちょい確認したい点があって。"],
+        ending: ["分かり次第すぐ返すね。", "もう少し待ってもらえると助かる！"]
+      },
+      "ふざけた": {
+        intro: ["催促ありがとう（優しめ）！", "リマインド助かる！"],
+        reason: ["いま全力で処理中です（手が8本ほしい）。", "進捗、作成中…％表示があれば見せたい。"],
+        ending: ["もうちょいだけ待って！", "続報、のちほど投下します！"]
+      }
     }
   },
 
   "プライベート": {
     "飲み会を断る": {
-      intro: [
-        "誘ってくれてありがとう！",
-        "お誘いありがとう〜！"
-      ],
-      reason: [
-        "最近ちょっとバタバタしてて、今回は難しそう。",
-        "体調管理を優先したくて、今回は見送らせて…！"
-      ],
-      ending: [
-        "また落ち着いたら行こう！",
-        "また次回ぜひ誘って！"
-      ]
-    },
-    "誘いを保留": {
-      intro: [
-        "ありがとう！",
-        "了解！"
-      ],
-      reason: [
-        "予定を確認してから返したいから、少し待ってね。",
-        "今ちょっと調整中で、すぐ確定できなくて…！"
-      ],
-      ending: [
-        "分かったらすぐ連絡する！",
-        "確認できたら改めて返すね。"
-      ]
-    }
-  },
-
-  "お金・契約": {
-    "支払いを待ってもらう": {
-      intro: [
-        "ご連絡ありがとうございます。",
-        "お待たせしており申し訳ありません。"
-      ],
-      reason: [
-        "現在手続き中のため、反映まで少しお時間をいただけますでしょうか。",
-        "確認事項があり、処理に時間がかかっております。"
-      ],
-      ending: [
-        "完了次第ご連絡します。",
-        "恐れ入りますが、もう少々お待ちください。"
-      ]
-    },
-    "値引きを断る": {
-      intro: [
-        "ご相談ありがとうございます。",
-        "ご希望は承知しました。"
-      ],
-      reason: [
-        "申し訳ありませんが、価格面は現条件が精一杯となります。",
-        "現時点では条件の変更が難しい状況です。"
-      ],
-      ending: [
-        "ご了承いただけますと幸いです。",
-        "ご理解のほど、よろしくお願いいたします。"
-      ]
-    }
-  },
-
-  "学校・習い事": {
-    "欠席連絡": {
-      intro: [
-        "お世話になっております。",
-        "ご連絡いたします。"
-      ],
-      reason: [
-        "体調不良のため、本日はお休みさせてください。",
-        "都合により本日は欠席いたします。"
-      ],
-      ending: [
-        "よろしくお願いいたします。",
-        "次回よろしくお願いいたします。"
-      ]
-    },
-    "提出遅れ": {
-      intro: [
-        "お世話になっております。",
-        "ご連絡いたします。"
-      ],
-      reason: [
-        "準備が整っておらず、提出が遅れてしまい申し訳ありません。",
-        "確認に時間がかかっており、遅れております。"
-      ],
-      ending: [
-        "でき次第提出いたします。",
-        "申し訳ありませんが、よろしくお願いいたします。"
-      ]
+      "丁寧": {
+        intro: ["お誘いありがとうございます。", "お声がけありがとうございます。"],
+        reason: ["今回は都合がつかず、参加が難しい状況です。", "体調管理の都合で今回は見送らせてください。"],
+        ending: ["またの機会にぜひお願いいたします。", "次回ぜひご一緒させてください。"]
+      },
+      "普通": {
+        intro: ["誘ってくれてありがとう！", "ありがとう！"],
+        reason: ["今週ちょっとバタバタで…", "今日は早めに休みたくて。"],
+        ending: ["今回はごめんね！", "また次回行こう！"]
+      },
+      "ふざけた": {
+        intro: ["お誘い感謝！", "飲み会召喚ありがとう！"],
+        reason: ["今日のHPが赤ゲージです。", "本日、布団とデートの先約がありまして。"],
+        ending: ["今回は不参加で！また誘って！", "次回は参戦する！🍻"]
+      }
     }
   },
 
   "万能": {
     "時間を稼ぐ": {
-      intro: [
-        "ありがとうございます。",
-        "承知しました。"
-      ],
-      reason: [
-        "少し検討する時間をいただけると助かります。",
-        "確認してから改めてお返事したいです。"
-      ],
-      ending: [
-        "まとまり次第ご連絡します。",
-        "少々お待ちください。"
-      ]
-    },
-    "深掘り回避": {
-      intro: [
-        "ありがとうございます。",
-        "すみません。"
-      ],
-      reason: [
-        "現状では詳細をお伝えできず、ご了承ください。",
-        "いまは確定していないため、決まり次第共有します。"
-      ],
-      ending: [
-        "ご理解いただけますと幸いです。",
-        "よろしくお願いします。"
-      ]
+      "丁寧": {
+        intro: ["承知しました。", "ありがとうございます。"],
+        reason: ["少し検討する時間をいただけますでしょうか。", "確認の上、改めてご連絡いたします。"],
+        ending: ["まとまり次第ご連絡いたします。", "恐れ入りますが、少々お待ちください。"]
+      },
+      "普通": {
+        intro: ["了解！", "ありがとう！"],
+        reason: ["ちょっと考えてから返したい！", "確認してから返すね。"],
+        ending: ["分かったら連絡する！", "少し待ってね！"]
+      },
+      "ふざけた": {
+        intro: ["了解っ！", "承知の助！"],
+        reason: ["脳内会議を開催します。", "検討タイム（コーヒー付き）入ります。"],
+        ending: ["結論出たら連絡する！", "続報を待て！"]
+      }
     }
   }
 };
@@ -243,44 +147,30 @@ const DATA = {
 
 const elCategory = document.getElementById("category");
 const elPurpose  = document.getElementById("purpose");
+const elTone     = document.getElementById("tone");
 const elOutput   = document.getElementById("output");
 const btnReload  = document.getElementById("reload");
 const btnCopy    = document.getElementById("copy");
 
 let lastText = "";
 
-/** ランダムで配列から1つ */
+// 安全：存在しない場合のデフォルト順
+const TONE_ORDER = ["丁寧", "普通", "ふざけた"];
+
 function pick(arr) {
   return arr[Math.floor(Math.random() * arr.length)];
 }
 
-/** intro+reason+ending を組み立て、同じ文章が連続しないようにする */
-function buildText() {
-  const cat = elCategory.value;
-  const pur = elPurpose.value;
+function getTonesFor(cat, pur) {
   const node = DATA?.[cat]?.[pur];
-
-  if (!node) return "テンプレがまだありません。";
-
-  const { intro = [], reason = [], ending = [] } = node;
-
-  // パーツが足りない場合の安全策
-  const i = intro.length  ? pick(intro)  : "";
-  const r = reason.length ? pick(reason) : "";
-  const e = ending.length ? pick(ending) : "";
-
-  let text = [i, r, e].filter(Boolean).join("\n");
-
-  // 同じ文が出たら最大5回まで作り直し
-  for (let k = 0; k < 5 && text === lastText; k++) {
-    const i2 = intro.length  ? pick(intro)  : i;
-    const r2 = reason.length ? pick(reason) : r;
-    const e2 = ending.length ? pick(ending) : e;
-    text = [i2, r2, e2].filter(Boolean).join("\n");
-  }
-
-  lastText = text;
-  return text;
+  if (!node) return TONE_ORDER;
+  const tones = Object.keys(node);
+  // 既定の順で並べ、未知は末尾に
+  const sorted = [
+    ...TONE_ORDER.filter(t => tones.includes(t)),
+    ...tones.filter(t => !TONE_ORDER.includes(t))
+  ];
+  return sorted.length ? sorted : TONE_ORDER;
 }
 
 function populateCategories() {
@@ -304,16 +194,69 @@ function populatePurposes() {
   });
 }
 
+function populateTones() {
+  const cat = elCategory.value;
+  const pur = elPurpose.value;
+  const tones = getTonesFor(cat, pur);
+
+  const current = elTone.value;
+  elTone.innerHTML = "";
+  tones.forEach((t) => {
+    const opt = document.createElement("option");
+    opt.value = t;
+    opt.textContent = t;
+    elTone.appendChild(opt);
+  });
+
+  // 前の選択があれば維持、なければ「普通」優先
+  if (tones.includes(current)) elTone.value = current;
+  else if (tones.includes("普通")) elTone.value = "普通";
+}
+
+function buildText() {
+  const cat = elCategory.value;
+  const pur = elPurpose.value;
+  const tone = elTone.value;
+
+  const node = DATA?.[cat]?.[pur]?.[tone];
+  if (!node) return "テンプレがまだありません。";
+
+  const { intro = [], reason = [], ending = [] } = node;
+
+  const i = intro.length  ? pick(intro)  : "";
+  const r = reason.length ? pick(reason) : "";
+  const e = ending.length ? pick(ending) : "";
+
+  let text = [i, r, e].filter(Boolean).join("\n");
+
+  for (let k = 0; k < 5 && text === lastText; k++) {
+    const i2 = intro.length  ? pick(intro)  : i;
+    const r2 = reason.length ? pick(reason) : r;
+    const e2 = ending.length ? pick(ending) : e;
+    text = [i2, r2, e2].filter(Boolean).join("\n");
+  }
+
+  lastText = text;
+  return text;
+}
+
 function generate() {
   elOutput.value = buildText();
 }
 
+// イベント
 elCategory.addEventListener("change", () => {
   populatePurposes();
+  populateTones();
   generate();
 });
 
-elPurpose.addEventListener("change", generate);
+elPurpose.addEventListener("change", () => {
+  populateTones();
+  generate();
+});
+
+elTone.addEventListener("change", generate);
 btnReload.addEventListener("click", generate);
 
 btnCopy.addEventListener("click", async () => {
@@ -330,6 +273,7 @@ btnCopy.addEventListener("click", async () => {
 // 初期化
 populateCategories();
 populatePurposes();
+populateTones();
 generate();
 </script>
 </body>

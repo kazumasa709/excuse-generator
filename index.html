@@ -24,14 +24,13 @@
   <div class="wrap">
     <div class="card">
       <h1>困ったときの言い訳メーカー</h1>
-      <div class="sub">カテゴリと用途を選ぶだけ。文章が自動で出ます（ログイン不要）</div>
+      <div class="sub">カテゴリ・用途・温度感を選ぶだけ。文章が自動で出ます（ログイン不要）</div>
 
       <div class="row">
-  <select id="category"></select>
-  <select id="purpose"></select>
-  <select id="tone"></select>
-</div>
-
+        <select id="category"></select>
+        <select id="purpose"></select>
+        <select id="tone"></select>
+      </div>
 
       <div style="margin-top:12px;">
         <textarea id="output" readonly></textarea>
@@ -51,102 +50,16 @@
   </div>
 
 <script>
-/**
- * ==========================
- * ✅ 追記専用ゾーン（ここだけ触る）
- * ==========================
- * 構造：カテゴリ → 用途 → トーン → intro/reason/ending
- * 追加ルール：
- * 1) 新カテゴリ：DATAに追加
- * 2) 新用途：カテゴリの中に追加
- * 3) 新トーン：toneキー（"丁寧" "普通" "ふざけた"）を追加
- * 4) 文追加：intro/reason/ending に1行追加
- */
-const DATA = {
-  "仕事・ビジネス": {
-    "断る": {
-      "丁寧": {
-        intro: ["ご連絡ありがとうございます。", "お声がけありがとうございます。"],
-        reason: ["現状の体制では対応が難しい状況です。", "スケジュールの都合で調整が難しそうです。"],
-        ending: ["恐れ入りますが、見送らせてください。", "また別の機会がございましたら、よろしくお願いいたします。"]
-      },
-      "普通": {
-        intro: ["連絡ありがとうございます。", "声かけありがとう！"],
-        reason: ["今ちょっと手が回らなくて…", "予定が詰まってて難しそう。"],
-        ending: ["今回は見送らせて！", "またタイミング合うときにお願いします！"]
-      },
-      "ふざけた": {
-        intro: ["お誘い感謝っ…！", "召喚ありがとうございます！"],
-        reason: ["今の私、タスクに包囲されております。", "スケジュールが満員御礼でござる。"],
-        ending: ["今回は撤退します🫡", "また次のクエストで！"]
-      }
-    },
+/* ==========================
+   設定
+========================== */
+let DATA = {};
+const API_URL = "https://script.google.com/macros/s/AKfycbwNeCUdDOBk08fiQ7gZGoqccdbahhItNAQyWHcWyJ1ijKdsv3AvCiahvW9wcNsSN_4cug/exec";
+const TONE_ORDER = ["丁寧", "普通", "ふざけた"];
 
-    "催促をかわす": {
-      "丁寧": {
-        intro: ["ご連絡ありがとうございます。", "お待たせしており申し訳ありません。"],
-        reason: ["現在対応中で、確認に少しお時間をいただいております。", "社内確認が必要な点があり、進行中です。"],
-        ending: ["進捗があり次第ご連絡いたします。", "恐れ入りますが、今しばらくお待ちください。"]
-      },
-      "普通": {
-        intro: ["連絡ありがとう！", "ごめん、確認中！"],
-        reason: ["いま対応してるところです。", "ちょい確認したい点があって。"],
-        ending: ["分かり次第すぐ返すね。", "もう少し待ってもらえると助かる！"]
-      },
-      "ふざけた": {
-        intro: ["催促ありがとう（優しめ）！", "リマインド助かる！"],
-        reason: ["いま全力で処理中です（手が8本ほしい）。", "進捗、作成中…％表示があれば見せたい。"],
-        ending: ["もうちょいだけ待って！", "続報、のちほど投下します！"]
-      }
-    }
-  },
-
-  "プライベート": {
-    "飲み会を断る": {
-      "丁寧": {
-        intro: ["お誘いありがとうございます。", "お声がけありがとうございます。"],
-        reason: ["今回は都合がつかず、参加が難しい状況です。", "体調管理の都合で今回は見送らせてください。"],
-        ending: ["またの機会にぜひお願いいたします。", "次回ぜひご一緒させてください。"]
-      },
-      "普通": {
-        intro: ["誘ってくれてありがとう！", "ありがとう！"],
-        reason: ["今週ちょっとバタバタで…", "今日は早めに休みたくて。"],
-        ending: ["今回はごめんね！", "また次回行こう！"]
-      },
-      "ふざけた": {
-        intro: ["お誘い感謝！", "飲み会召喚ありがとう！"],
-        reason: ["今日のHPが赤ゲージです。", "本日、布団とデートの先約がありまして。"],
-        ending: ["今回は不参加で！また誘って！", "次回は参戦する！🍻"]
-      }
-    }
-  },
-
-  "万能": {
-    "時間を稼ぐ": {
-      "丁寧": {
-        intro: ["承知しました。", "ありがとうございます。"],
-        reason: ["少し検討する時間をいただけますでしょうか。", "確認の上、改めてご連絡いたします。"],
-        ending: ["まとまり次第ご連絡いたします。", "恐れ入りますが、少々お待ちください。"]
-      },
-      "普通": {
-        intro: ["了解！", "ありがとう！"],
-        reason: ["ちょっと考えてから返したい！", "確認してから返すね。"],
-        ending: ["分かったら連絡する！", "少し待ってね！"]
-      },
-      "ふざけた": {
-        intro: ["了解っ！", "承知の助！"],
-        reason: ["脳内会議を開催します。", "検討タイム（コーヒー付き）入ります。"],
-        ending: ["結論出たら連絡する！", "続報を待て！"]
-      }
-    }
-  }
-};
-/**
- * ==========================
- * ✅ 追記専用ゾーンここまで
- * ==========================
- */
-
+/* ==========================
+   DOM
+========================== */
 const elCategory = document.getElementById("category");
 const elPurpose  = document.getElementById("purpose");
 const elTone     = document.getElementById("tone");
@@ -156,28 +69,28 @@ const btnCopy    = document.getElementById("copy");
 
 let lastText = "";
 
-// 安全：存在しない場合のデフォルト順
-const TONE_ORDER = ["丁寧", "普通", "ふざけた"];
-
+/* ==========================
+   Utility
+========================== */
 function pick(arr) {
   return arr[Math.floor(Math.random() * arr.length)];
 }
 
-function getTonesFor(cat, pur) {
-  const node = DATA?.[cat]?.[pur];
-  if (!node) return TONE_ORDER;
-  const tones = Object.keys(node);
-  // 既定の順で並べ、未知は末尾に
-  const sorted = [
-    ...TONE_ORDER.filter(t => tones.includes(t)),
-    ...tones.filter(t => !TONE_ORDER.includes(t))
-  ];
-  return sorted.length ? sorted : TONE_ORDER;
+/* ==========================
+   API load
+========================== */
+async function loadTemplates() {
+  const res = await fetch(API_URL, { cache: "no-store" });
+  if (!res.ok) throw new Error("API error: " + res.status);
+  DATA = await res.json();
 }
 
+/* ==========================
+   Populate selects
+========================== */
 function populateCategories() {
   elCategory.innerHTML = "";
-  Object.keys(DATA).forEach((cat) => {
+  Object.keys(DATA).forEach(cat => {
     const opt = document.createElement("option");
     opt.value = cat;
     opt.textContent = cat;
@@ -186,9 +99,9 @@ function populateCategories() {
 }
 
 function populatePurposes() {
-  const cat = elCategory.value;
+  const catNode = DATA[elCategory.value];
   elPurpose.innerHTML = "";
-  Object.keys(DATA[cat]).forEach((pur) => {
+  Object.keys(catNode).forEach(pur => {
     const opt = document.createElement("option");
     opt.value = pur;
     opt.textContent = pur;
@@ -197,56 +110,61 @@ function populatePurposes() {
 }
 
 function populateTones() {
-  const cat = elCategory.value;
-  const pur = elPurpose.value;
-  const tones = getTonesFor(cat, pur);
+  const catNode = DATA[elCategory.value];
+  const purNode = catNode[elPurpose.value];
+  const tones = Object.keys(purNode);
 
-  const current = elTone.value;
+  const ordered = [
+    ...TONE_ORDER.filter(t => tones.includes(t)),
+    ...tones.filter(t => !TONE_ORDER.includes(t))
+  ];
+
   elTone.innerHTML = "";
-  tones.forEach((t) => {
+  ordered.forEach(t => {
     const opt = document.createElement("option");
     opt.value = t;
     opt.textContent = t;
     elTone.appendChild(opt);
   });
 
-  // 前の選択があれば維持、なければ「普通」優先
-  if (tones.includes(current)) elTone.value = current;
-  else if (tones.includes("普通")) elTone.value = "普通";
+  if (ordered.includes("普通")) elTone.value = "普通";
 }
 
+/* ==========================
+   Text generation
+========================== */
 function buildText() {
-  const cat = elCategory.value;
-  const pur = elPurpose.value;
-  const tone = elTone.value;
+  const node = DATA[elCategory.value][elPurpose.value][elTone.value];
 
-  const node = DATA?.[cat]?.[pur]?.[tone];
-  if (!node) return "テンプレがまだありません。";
+  const intro  = node.intro  || [];
+  const reason = node.reason || [];
+  const ending = node.ending || [];
 
-  const { intro = [], reason = [], ending = [] } = node;
+  let text = [
+    intro.length  ? pick(intro)  : "",
+    reason.length ? pick(reason) : "",
+    ending.length ? pick(ending) : ""
+  ].filter(Boolean).join("\n");
 
-  const i = intro.length  ? pick(intro)  : "";
-  const r = reason.length ? pick(reason) : "";
-  const e = ending.length ? pick(ending) : "";
-
-  let text = [i, r, e].filter(Boolean).join("\n");
-
-  for (let k = 0; k < 5 && text === lastText; k++) {
-    const i2 = intro.length  ? pick(intro)  : i;
-    const r2 = reason.length ? pick(reason) : r;
-    const e2 = ending.length ? pick(ending) : e;
-    text = [i2, r2, e2].filter(Boolean).join("\n");
+  for (let i = 0; i < 5 && text === lastText; i++) {
+    text = [
+      intro.length  ? pick(intro)  : "",
+      reason.length ? pick(reason) : "",
+      ending.length ? pick(ending) : ""
+    ].filter(Boolean).join("\n");
   }
 
   lastText = text;
-  return text;
+  return text || "テンプレがありません。";
 }
 
 function generate() {
   elOutput.value = buildText();
 }
 
-// イベント
+/* ==========================
+   Events
+========================== */
 elCategory.addEventListener("change", () => {
   populatePurposes();
   populateTones();
@@ -266,17 +184,27 @@ btnCopy.addEventListener("click", async () => {
     await navigator.clipboard.writeText(elOutput.value);
     const prev = btnCopy.textContent;
     btnCopy.textContent = "コピーしました";
-    setTimeout(() => (btnCopy.textContent = prev), 900);
+    setTimeout(() => btnCopy.textContent = prev, 900);
   } catch {
-    alert("コピーに失敗しました。手動で選択してコピーしてください。");
+    alert("コピーに失敗しました。");
   }
 });
 
-// 初期化
-populateCategories();
-populatePurposes();
-populateTones();
-generate();
+/* ==========================
+   Init
+========================== */
+(async () => {
+  try {
+    await loadTemplates();
+    populateCategories();
+    populatePurposes();
+    populateTones();
+    generate();
+  } catch (e) {
+    console.error(e);
+    elOutput.value = "テンプレの読み込みに失敗しました。";
+  }
+})();
 </script>
 </body>
 </html>
